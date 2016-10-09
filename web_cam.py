@@ -1,16 +1,18 @@
 import cv2
+from face_detection import haar
 
 cap = cv2.VideoCapture(0)
+
+face_det = haar.Haar()
 
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
 
-    # Our operations on the frame come here
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    face_det.detect(frame)
 
     # Display the resulting frame
-    cv2.imshow('frame',gray)
+    cv2.imshow('frame',frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
