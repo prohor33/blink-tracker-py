@@ -1,15 +1,19 @@
-#!/usr/bin/env python3
-
 import cv2
 from face_detection import haar
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('data/video1.mp4')
 
 face_det = haar.Haar()
 
 while(True):
+    cap.grab()
+
     # Capture frame-by-frame
-    ret, frame = cap.read()
+    ret, frame = cap.retrieve()
+
+    if not ret:
+        print("error: no frame")
+        break
 
     face_det.detect(frame)
 
