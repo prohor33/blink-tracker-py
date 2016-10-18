@@ -1,7 +1,8 @@
 import cv2
+import time
 from face_detection import haar
 
-cap = cv2.VideoCapture('data/video1.mp4')
+cap = cv2.VideoCapture('data/video0.mp4')
 
 face_det = haar.Haar()
 
@@ -21,6 +22,8 @@ while(True):
     cv2.imshow('frame',frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
+    time.sleep(0.2)
 
 # When everything done, release the capture
 cap.release()
