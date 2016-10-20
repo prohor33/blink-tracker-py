@@ -1,7 +1,7 @@
 import cv2
-from face_detection import haar
+from face_detector import face_detector
 
-face_det = haar.Haar()
+face_det = face_detector.Haar()
 i = 0
 
 while True:
@@ -10,7 +10,7 @@ while True:
         break
     face_det.detect(img)
     cv2.imshow('img' + str(i), img)
-    print('one window' + str(i))
+    print('window' + str(i))
     i += 1
 
 cv2.waitKey(0)
