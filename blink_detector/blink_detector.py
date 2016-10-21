@@ -21,8 +21,11 @@ class BlinkDetector:
         if face_img is None:
             return False
 
+        size = 100
+        face_img = cv2.resize(face_img, (size, size), interpolation=cv2.INTER_CUBIC)
+
         face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
 
-        left_eye_img, right_eye_img = self.eye_det.get_eyes(src_img, face_img, face_rect[0])
+        left_eye_img, right_eye_img = self.eye_det.get_eyes(src_img, face_img, face_rect)
 
         return True

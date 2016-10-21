@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from face_detector import face_detector
+from eye_detector import eye_detector
 from blink_detector import blink_detector
 import os
 import cv2
@@ -37,6 +38,86 @@ class DataManager:
 
 
         print('found: ' + str(found))
+        print('not found: ' + str(not_found))
+
+
+    def run_eye_detection(self, src_dir):
+
+        eye_det = eye_detector.EyeDetector()
+
+        eyes_position = {}
+
+        # считываем файл с результатами
+        answer_file = open(src_dir + '/../EyeCoordinatesInfo_OpenFace.txt', 'r')
+        for line in answer_file:
+            tmp_str = line.split()
+            filename = tmp_str[0]
+            x0 = int(tmp_str[1])
+            y0 = int(tmp_str[2])
+            x1 = int(tmp_str[3])
+            y1 = int(tmp_str[4])
+            eyes_position[filename] = (x0, y0, x1, y1)
+
+
+
+        res_dir = src_dir + '/result/'
+        l_res_dir = src_dir + '/result/left_eye/'
+        r_res_dir = src_dir + '/result/right_eye/'
+        if os.path.exists(res_dir):
+            shutil.rmtree(res_dir)
+        os.makedirs(l_res_dir)
+        os.makedirs(r_res_dir)
+
+        found_both = 0
+        found_one = 0
+        not_found = 0
+
+        for filename in os.listdir(src_dir):
+            img = cv2.imread(src_dir + '/' + filename)
+            if img is None:
+                print('error: no image')
+                continue
+
+            height, width, channels = img.shape
+            face_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+            l_eye_img, r_eye_img, l_eye_rect, r_eye_rect = eye_det.get_eyes(img, face_img, ((0, 0), (width, height)))
+
+            eyes_pos = eyes_position[filename]
+
+            is_eye_ok = lambda x_or, y_or, x, y, w, h: x_or < x or x_or > (x + w) or y_or < y or y_or > (y + h)
+
+            l_eye_is_found = False
+            r_eye_is_found = False
+
+            size = 24
+            if l_eye_img is not  None:
+
+                l_eye_is_found = is_eye_ok(eyes_pos[0], eyes_pos[1],
+                                           l_eye_rect[0], l_eye_rect[1], l_eye_rect[2], l_eye_rect[3])
+
+                l_eye_img = cv2.resize(l_eye_img, (size, size), interpolation=cv2.INTER_CUBIC)
+                cv2.imwrite(l_res_dir + filename, l_eye_img)
+
+            if r_eye_img is not None:
+                r_eye_is_found = is_eye_ok(eyes_pos[2], eyes_pos[3],
+                                           r_eye_rect[0], r_eye_rect[1], r_eye_rect[2], r_eye_rect[3])
+
+                r_eye_img = cv2.resize(r_eye_img, (size, size), interpolation=cv2.INTER_CUBIC)
+                cv2.imwrite(r_res_dir + filename, r_eye_img)
+
+            if l_eye_is_found and r_eye_is_found:
+                found_both += 1
+            else:
+                if l_eye_is_found or r_eye_is_found:
+                    found_one += 1
+                else:
+                    not_found += 1
+
+                cv2.imwrite(res_dir + filename, img)
+
+        print('found both: ' + str(found_both))
+        print('found one: ' + str(found_one))
         print('not found: ' + str(not_found))
 
     def run_on_video(self, filename):
