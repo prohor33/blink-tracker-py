@@ -119,6 +119,8 @@ class DataManager:
         print('found both: ' + str(found_both))
         print('found one: ' + str(found_one))
         print('not found: ' + str(not_found))
+        print('complement eye variants: ' + str(eye_det.complement_eye_variants_stat))
+        print('all eyes pair are contradict: ' + str(eye_det.all_eyes_pair_are_contradict))
 
     def run_on_video(self, filename):
         cap = cv2.VideoCapture(filename)
