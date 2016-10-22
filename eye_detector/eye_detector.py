@@ -25,6 +25,9 @@ class EyeDetector:
 
     cv2.ocl.setUseOpenCL(False)
 
+    try_to_find_second_time = 0
+    found_second_time = 0
+
     # на вход подается лицо (квадрат) в серых тонах
     def get_eyes(self, src_img, face_img, face_rect):
 
@@ -33,10 +36,14 @@ class EyeDetector:
         self.face_height = height
 
         # ищем глаза только в верхней части лица
-        face_img = face_img[0:int(height * 0.6), 0:width]
+        # face_img = face_img[0:int(height * 0.6), 0:width]
+        face_img = face_img[0:int(height * 1), 0:width]
 
-        self.min_eye_size = (int(width / 10), int(width / 10))
-        self.max_eye_size = (int(width / 3), int(width / 3))
+        # self.min_eye_size = (int(width / 10), int(width / 10))
+        # self.max_eye_size = (int(width / 3), int(width / 3))
+
+        self.min_eye_size = (int(width / 100), int(width / 100))
+        self.max_eye_size = (int(width / 1), int(width / 1))
 
         possible_l_eyes = []
         possible_r_eyes = []
@@ -53,12 +60,37 @@ class EyeDetector:
                          self.scale_factor, self.min_neighbors, can_be_right, possible_r_eyes)
 
         # делаем дополнение, если не нашли
-        self.complement_eye_variants(face_img, self.eye_cascade, possible_l_eyes, possible_r_eyes,
-                                     can_be_left, can_be_right)
-        self.complement_eye_variants(face_img, self.eyeglasses_cascade, possible_l_eyes, possible_r_eyes,
-                                     can_be_left, can_be_right)
+        use_complement0 = False
+        use_complement1 = False
+
+        if len(possible_l_eyes) == 0 or len(possible_r_eyes) == 0:
+            use_complement0 = True
+            self.complement_eye_variants(face_img, self.eye_cascade, possible_l_eyes, possible_r_eyes,
+                                        can_be_left, can_be_right)
+
+        if len(possible_l_eyes) == 0 or len(possible_r_eyes) == 0:
+            use_complement1 = True
+            self.complement_eye_variants(face_img, self.eyeglasses_cascade, possible_l_eyes, possible_r_eyes,
+                                        can_be_left, can_be_right)
 
         l_eye, r_eye = self.choose_best_eyes(possible_l_eyes, possible_r_eyes)
+        if l_eye is None or r_eye is None:
+            # если хотя бы одного из глаз не хватает, пытаемся доискать
+
+            if not use_complement0:
+                self.complement_eye_variants(face_img, self.eye_cascade, possible_l_eyes, possible_r_eyes,
+                                             can_be_left, can_be_right)
+            if not use_complement1:
+                self.complement_eye_variants(face_img, self.eyeglasses_cascade, possible_l_eyes, possible_r_eyes,
+                                             can_be_left, can_be_right)
+
+            if not use_complement0 or not use_complement1:
+                l_eye, r_eye = self.choose_best_eyes(possible_l_eyes, possible_r_eyes)
+
+                self.try_to_find_second_time += 1
+                if l_eye is not None and r_eye is not None:
+                    self.found_second_time += 1
+
 
         # возвращаем результат
 
@@ -104,20 +136,19 @@ class EyeDetector:
 
     # дополняет результаты поиска глаза, если он еще не найден
     def complement_eye_variants(self, img, haar, possible_l_eyes, possible_r_eyes, can_be_left, can_be_right):
-        if len(possible_l_eyes) == 0 or len(possible_r_eyes) == 0:
-            possible_eyes = []
+        possible_eyes = []
 
-            self.add_eye_variants(img, haar,
-                                  self.scale_factor, self.min_neighbors, lambda x, y, w, h: True, possible_eyes)
+        self.add_eye_variants(img, haar,
+                              self.scale_factor, self.min_neighbors, lambda x, y, w, h: True, possible_eyes)
 
-            for eye_rect in possible_eyes:
-                if len(possible_l_eyes) == 0 and can_be_left(*eye_rect):
-                    possible_l_eyes.append(eye_rect)
-                elif len(possible_r_eyes) == 0 and can_be_right(*eye_rect):
-                    possible_r_eyes.append(eye_rect)
-                if len(possible_l_eyes) != 0 and len(possible_r_eyes) != 0:
-                    self.complement_eye_variants_stat += 1
-                    break
+        for eye_rect in possible_eyes:
+            if len(possible_l_eyes) == 0 and can_be_left(*eye_rect):
+                possible_l_eyes.append(eye_rect)
+            elif len(possible_r_eyes) == 0 and can_be_right(*eye_rect):
+                possible_r_eyes.append(eye_rect)
+            if len(possible_l_eyes) != 0 and len(possible_r_eyes) != 0:
+                self.complement_eye_variants_stat += 1
+                break
 
     # статистика по случаю, когда все найденные пары глаз противоречивые
     all_eyes_pair_are_contradict = 0

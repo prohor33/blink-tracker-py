@@ -121,6 +121,8 @@ class DataManager:
         print('not found: ' + str(not_found))
         print('complement eye variants: ' + str(eye_det.complement_eye_variants_stat))
         print('all eyes pair are contradict: ' + str(eye_det.all_eyes_pair_are_contradict))
+        print('try to find second time: ' + str(eye_det.try_to_find_second_time))
+        print('found second time: ' + str(eye_det.found_second_time))
 
     def run_on_video(self, filename):
         cap = cv2.VideoCapture(filename)
