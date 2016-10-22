@@ -97,14 +97,14 @@ class DataManager:
                                            l_eye_rect[0], l_eye_rect[1], l_eye_rect[2], l_eye_rect[3])
 
                 l_eye_img = cv2.resize(l_eye_img, (size, size), interpolation=cv2.INTER_CUBIC)
-                cv2.imwrite(l_res_dir + filename, l_eye_img)
+                # cv2.imwrite(l_res_dir + filename, l_eye_img)
 
             if r_eye_img is not None:
                 r_eye_is_found = is_eye_ok(eyes_pos[2], eyes_pos[3],
                                            r_eye_rect[0], r_eye_rect[1], r_eye_rect[2], r_eye_rect[3])
 
                 r_eye_img = cv2.resize(r_eye_img, (size, size), interpolation=cv2.INTER_CUBIC)
-                cv2.imwrite(r_res_dir + filename, r_eye_img)
+                # cv2.imwrite(r_res_dir + filename, r_eye_img)
 
             if l_eye_is_found and r_eye_is_found:
                 found_both += 1
