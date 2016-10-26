@@ -133,6 +133,13 @@ class DataManager:
             # Capture frame-by-frame
             ret, frame = cap.retrieve()
 
+            height, width, chanel = frame.shape
+
+            # уменьшаем размер
+            max_size = 200
+            transform_coef = max_size / max(width, height)
+            frame = cv2.resize(frame, (0, 0), fx=transform_coef, fy=transform_coef)
+
             if not ret:
                 print("error: no frame")
                 break
