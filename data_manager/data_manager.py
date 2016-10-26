@@ -60,9 +60,9 @@ class DataManager:
 
 
 
-        res_dir = src_dir + '/result/'
-        l_res_dir = src_dir + '/result/left_eye/'
-        r_res_dir = src_dir + '/result/right_eye/'
+        res_dir = src_dir + '_res/'
+        l_res_dir = src_dir + '_res/left_eye/'
+        r_res_dir = src_dir + '_res/right_eye/'
         if os.path.exists(res_dir):
             shutil.rmtree(res_dir)
         os.makedirs(l_res_dir)
@@ -75,7 +75,7 @@ class DataManager:
         for filename in os.listdir(src_dir):
             img = cv2.imread(src_dir + '/' + filename)
             if img is None:
-                print('error: no image')
+                print('warning: no image')
                 continue
 
             height, width, channels = img.shape
@@ -97,14 +97,14 @@ class DataManager:
                                            l_eye_rect[0], l_eye_rect[1], l_eye_rect[2], l_eye_rect[3])
 
                 l_eye_img = cv2.resize(l_eye_img, (size, size), interpolation=cv2.INTER_CUBIC)
-                # cv2.imwrite(l_res_dir + filename, l_eye_img)
+                cv2.imwrite(l_res_dir + filename, l_eye_img)
 
             if r_eye_img is not None:
                 r_eye_is_found = is_eye_ok(eyes_pos[2], eyes_pos[3],
                                            r_eye_rect[0], r_eye_rect[1], r_eye_rect[2], r_eye_rect[3])
 
                 r_eye_img = cv2.resize(r_eye_img, (size, size), interpolation=cv2.INTER_CUBIC)
-                # cv2.imwrite(r_res_dir + filename, r_eye_img)
+                cv2.imwrite(r_res_dir + filename, r_eye_img)
 
             if l_eye_is_found and r_eye_is_found:
                 found_both += 1
@@ -114,15 +114,13 @@ class DataManager:
                 else:
                     not_found += 1
 
-                cv2.imwrite(res_dir + filename, img)
+            cv2.imwrite(res_dir + filename, img)
 
         print('found both: ' + str(found_both))
         print('found one: ' + str(found_one))
         print('not found: ' + str(not_found))
         print('complement eye variants: ' + str(eye_det.complement_eye_variants_stat))
         print('all eyes pair are contradict: ' + str(eye_det.all_eyes_pair_are_contradict))
-        print('try to find second time: ' + str(eye_det.try_to_find_second_time))
-        print('found second time: ' + str(eye_det.found_second_time))
 
     def run_on_video(self, filename):
         cap = cv2.VideoCapture(filename)

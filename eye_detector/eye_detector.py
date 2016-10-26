@@ -15,7 +15,7 @@ class EyeDetector:
     eyeglasses_cascade = cv2.CascadeClassifier(haars_fld + 'haarcascade_eye_tree_eyeglasses.xml')
 
     scale_factor = 1.1
-    min_neighbors = 5
+    min_neighbors = 1
 
     min_eye_size = (0, 0)
     max_eye_size = (0, 0)
@@ -25,9 +25,6 @@ class EyeDetector:
 
     cv2.ocl.setUseOpenCL(False)
 
-    try_to_find_second_time = 0
-    found_second_time = 0
-
     # на вход подается лицо (квадрат) в серых тонах
     def get_eyes(self, src_img, face_img, face_rect):
 
@@ -36,14 +33,10 @@ class EyeDetector:
         self.face_height = height
 
         # ищем глаза только в верхней части лица
-        # face_img = face_img[0:int(height * 0.6), 0:width]
-        face_img = face_img[0:int(height * 1), 0:width]
+        face_img = face_img[0:int(height * 0.8), 0:width]
 
-        # self.min_eye_size = (int(width / 10), int(width / 10))
-        # self.max_eye_size = (int(width / 3), int(width / 3))
-
-        self.min_eye_size = (int(width / 100), int(width / 100))
-        self.max_eye_size = (int(width / 1), int(width / 1))
+        self.min_eye_size = (int(width / 10), int(width / 10))
+        self.max_eye_size = (int(width / 3), int(width / 3))
 
         possible_l_eyes = []
         possible_r_eyes = []
@@ -74,23 +67,6 @@ class EyeDetector:
                                         can_be_left, can_be_right)
 
         l_eye, r_eye = self.choose_best_eyes(possible_l_eyes, possible_r_eyes)
-        if l_eye is None or r_eye is None:
-            # если хотя бы одного из глаз не хватает, пытаемся доискать
-
-            if not use_complement0:
-                self.complement_eye_variants(face_img, self.eye_cascade, possible_l_eyes, possible_r_eyes,
-                                             can_be_left, can_be_right)
-            if not use_complement1:
-                self.complement_eye_variants(face_img, self.eyeglasses_cascade, possible_l_eyes, possible_r_eyes,
-                                             can_be_left, can_be_right)
-
-            if not use_complement0 or not use_complement1:
-                l_eye, r_eye = self.choose_best_eyes(possible_l_eyes, possible_r_eyes)
-
-                self.try_to_find_second_time += 1
-                if l_eye is not None and r_eye is not None:
-                    self.found_second_time += 1
-
 
         # возвращаем результат
 
