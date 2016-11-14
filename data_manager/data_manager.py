@@ -114,7 +114,7 @@ class DataManager:
                 else:
                     not_found += 1
 
-            cv2.imwrite(res_dir + filename, img)
+            # cv2.imwrite(res_dir + filename, img)
 
         print('found both: ' + str(found_both))
         print('found one: ' + str(found_one))
@@ -137,8 +137,9 @@ class DataManager:
 
             # уменьшаем размер
             max_size = 200
-            transform_coef = max_size / max(width, height)
-            frame = cv2.resize(frame, (0, 0), fx=transform_coef, fy=transform_coef)
+            transform_factor = max_size / max(width, height)
+            if transform_factor < 1.0:
+                frame = cv2.resize(frame, (0, 0), fx=transform_factor, fy=transform_factor)
 
             if not ret:
                 print("error: no frame")
@@ -156,3 +157,21 @@ class DataManager:
         # When everything done, release the capture
         cap.release()
         cv2.destroyAllWindows()
+
+
+    eye_cascade = cv2.CascadeClassifier('data/haars/haarcascade_eye.xml')
+
+    def simple_detection(self, src_dir):
+
+        for filename in os.listdir(src_dir):
+            file_path = src_dir + '/' + filename
+            img = cv2.imread(file_path)
+            if img is None:
+                print('warning: no image')
+                continue
+
+            eyes = self.eye_cascade.detectMultiScale(img, 1.01, 1)
+            for (ex, ey, ew, eh) in eyes:
+                cv2.rectangle(img, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
+
+            cv2.imwrite(file_path, img)

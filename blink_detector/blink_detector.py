@@ -35,8 +35,12 @@ class BlinkDetector:
         if face_img is None:
             return False
 
-        size = 100
-        face_img = cv2.resize(face_img, (size, size), interpolation=cv2.INTER_CUBIC)
+        face_h, face_w, face_chanel = face_img.shape
+
+        # меняем размер лица к 100x100
+        new_size = 100
+        transform_factor = new_size / max(face_w, face_h)
+        face_img = cv2.resize(face_img, (0, 0), fx=transform_factor, fy=transform_factor)
 
         face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
 

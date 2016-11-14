@@ -21,7 +21,6 @@ class FaceDetector:
 
         faces = self.face_cascade.detectMultiScale(gray, self.face_scale_factor, self.face_min_neighbors)
         for (x,y,w,h) in faces:
-            # cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
             # возвращаем тупо первый вариант
             roi = src_img[y:y + h, x:x + w]
             cv2.rectangle(src_img, (x, y), (x + w, y + h), (255, 0, 0), 1)
