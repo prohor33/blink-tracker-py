@@ -2,9 +2,11 @@
 from face_detector import face_detector
 from eye_detector import eye_detector
 from blink_detector import blink_detector
+from eye_shape_detector import eye_shape_detector
 import os
 import cv2
 import shutil
+from .utils import *
 
 
 class DataManager:
@@ -175,3 +177,27 @@ class DataManager:
                 cv2.rectangle(img, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
 
             cv2.imwrite(file_path, img)
+
+
+    def run_eye_shape_detection(self, src_dir):
+        res_dir = src_dir + '_eye_shape/'
+        if os.path.exists(res_dir):
+            shutil.rmtree(res_dir)
+        os.makedirs(res_dir)
+
+        eye_shape_det = eye_shape_detector.EyeShapeDetector()
+
+        for filename in os.listdir(src_dir):
+            img = cv2.imread(src_dir + '/' + filename)
+            if img is None:
+                print('warning: no image')
+                continue
+            src_img = img.copy()
+
+            res0, res1 = eye_shape_det.get_shape(img)
+
+            res_img = one_img_from_three(src_img, res0, res1)
+
+            size_coef = 4
+            res_img = cv2.resize(res_img, None, fx=size_coef, fy=size_coef, interpolation=cv2.INTER_CUBIC)
+            cv2.imwrite(res_dir + filename, res_img)
