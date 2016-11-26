@@ -194,10 +194,11 @@ class DataManager:
                 continue
             src_img = img.copy()
 
-            res0, res1 = eye_shape_det.get_shape(img)
+            res0, res1, res2, res3, res4 = eye_shape_det.get_shape(img)
 
-            res_img = one_img_from_three(src_img, res0, res1)
+            res_img = np.concatenate((res0, res1, res2, res3, res4), axis=1)
 
-            size_coef = 4
+            # size_coef = 4
+            size_coef = 3
             res_img = cv2.resize(res_img, None, fx=size_coef, fy=size_coef, interpolation=cv2.INTER_CUBIC)
             cv2.imwrite(res_dir + filename, res_img)

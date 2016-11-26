@@ -1,5 +1,7 @@
 import cv2
 from itertools import cycle
+import numpy as np
+from data_manager import utils
 
 class EyeShapeDetector:
 
@@ -32,7 +34,32 @@ class EyeShapeDetector:
         cv2.line(res_img1, (st_p[0], int(st_p[1] - cross_s[1])), (st_p[0], int(st_p[1] + cross_s[1])),
                  color=(0, 0, 255))
 
-        # _, contours0, hierarchy = cv2.findContours(img.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # находим контуры
+        _, contours0, hierarchy = cv2.findContours(res.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours = [cv2.approxPolyDP(cnt, 3, True) for cnt in contours0]
+        res_img2 = np.zeros((h, w, 3), np.uint8)
+        levels = 1
+        cv2.drawContours(res_img2, contours, (-1, 2)[levels <= 0], (128, 255, 255),
+                         3, cv2.LINE_AA, hierarchy, abs(levels))
 
-        return res_img0, res_img1
+        # находим прямоугольники
+        res_img3 = np.zeros((h, w, 3), np.uint8)
+        boxes = []
+        for cnt in contours:
+            rect = cv2.minAreaRect(cnt)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            boxes.append(box)
+
+        boxes.sort(key=lambda box: utils.get_box_area(box))
+        ok_boxes = boxes[-2:]
+
+        for box in boxes:
+            cv2.drawContours(res_img3, [box], 0, (0, 0, 255), 2)
+
+        res_img4 = np.zeros((h, w, 3), np.uint8)
+        for box in ok_boxes:
+            cv2.drawContours(res_img4, [box], 0, (0, 0, 255), 2)
+
+        return src_img, res_img0, res_img2, res_img3, res_img4
 
