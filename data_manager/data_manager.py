@@ -199,6 +199,6 @@ class DataManager:
             res_img = np.concatenate((res0, res1, res2, res3, res4), axis=1)
 
             # size_coef = 4
-            size_coef = 3
-            res_img = cv2.resize(res_img, None, fx=size_coef, fy=size_coef, interpolation=cv2.INTER_CUBIC)
+            # size_coef = 3
+            # res_img = cv2.resize(res_img, None, fx=size_coef, fy=size_coef, interpolation=cv2.INTER_CUBIC)
             cv2.imwrite(res_dir + filename, res_img)
