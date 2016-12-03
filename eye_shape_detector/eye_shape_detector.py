@@ -7,6 +7,9 @@ class EyeShapeDetector:
 
     # на вход подается квадрат: глаз и то, что вокруг него в серых тонах
     def get_shape(self, src_img):
+        thrs_percent = 20
+        threshold_res = utils.threshold_up_to_percent(src_img, thrs_percent)
+
         # edge_linking_thr = 0
         # initial_segment_strongedges = 1850
         edge_linking_thr = 754
@@ -63,6 +66,7 @@ class EyeShapeDetector:
 
         src_img = utils.scale_img(src_img, scale_factor)
         res_img0 = utils.scale_img(res_img0, scale_factor)
+        threshold_res = utils.scale_img(threshold_res, scale_factor)
         res_img2 = src_img.copy()
         res_img3 = src_img.copy()
         res_img4 = src_img.copy()
@@ -80,5 +84,5 @@ class EyeShapeDetector:
         for box in ok_boxes:
             cv2.drawContours(res_img4, [box], 0, (0, 0, 255), line_w)
 
-        return src_img, res_img0, res_img2, res_img3, res_img4
+        return src_img, threshold_res, res_img0, res_img2, res_img3, res_img4
 

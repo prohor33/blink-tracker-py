@@ -29,3 +29,23 @@ def scale_countours(contours, factor):
 
 def scale_img(img, factor):
     return cv2.resize(img, None, fx=factor, fy=factor, interpolation=cv2.INTER_CUBIC)
+
+def get_percent_of_threshold(img, thrs):
+    h, w = img.shape
+    retv, threshold_res = cv2.threshold(img, thresh=thrs, maxval=1,  type=cv2.THRESH_TOZERO)
+    return [1.0 - cv2.countNonZero(threshold_res) / (h * w), threshold_res]
+
+def threshold_up_to_percent(img, target_percent):
+    target_percent = target_percent / 100.0
+    img = img[:, :, 0]
+    result = []
+    thrsholds = [10, 40, 60, 80, 100, 120, 150, 180, 230]
+    for thrs in thrsholds:
+        res = [thrs]
+        res.extend(get_percent_of_threshold(img, thrs))
+        result.append(res)
+    result = sorted(result, key=lambda x: abs(x[1] - target_percent))
+    for r in result:
+        print('result = ', r[0], ' ', r[1])
+    print('\n')
+    return result[0][2]
