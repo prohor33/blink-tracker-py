@@ -7,7 +7,11 @@ class EyeShapeDetector:
 
     # на вход подается квадрат: глаз и то, что вокруг него в серых тонах
     def get_shape(self, src_img):
-        canny_img = cv2.Canny(src_img, threshold1=0, threshold2=1850, apertureSize=5)
+        # edge_linking_thr = 0
+        # initial_segment_strongedges = 1850
+        edge_linking_thr = 754
+        initial_segment_strongedges = 1460
+        canny_img = cv2.Canny(src_img, threshold1=edge_linking_thr, threshold2=initial_segment_strongedges, apertureSize=5)
 
         res_img0 = src_img.copy()
         res_img1 = src_img.copy()
@@ -52,7 +56,7 @@ class EyeShapeDetector:
         boxes.sort(key=lambda box: utils.get_box_area(box))
         ok_boxes = boxes[-2:]
 
-        scale_factor = 3
+        scale_factor = 5
         for box in boxes:
             utils.scale_points(box, scale_factor)
         utils.scale_countours(contours, scale_factor)
