@@ -14,6 +14,12 @@ def distance(p0, p1):
 def get_box_area(b):
     return distance(b[0], b[1]) * distance(b[1], b[2])
 
+def get_middle(p0, p1):
+    return ((p0[0] + p1[0]) / 2.0, (p0[1] + p1[1]) / 2.0)
+
+def get_box_center(b):
+    return get_middle(b[0], b[2])
+
 def scale_points(points, factor):
     for p in points:
         p[0] = p[0] * factor
@@ -36,10 +42,11 @@ def get_percent_of_threshold(img, thrs):
     return [1.0 - cv2.countNonZero(threshold_res) / (h * w), threshold_res]
 
 def threshold_up_to_percent(src_img, target_percent):
+    h, w, channels = src_img.shape
     target_percent = target_percent / 100.0
     img = src_img[:, :, 0]
     result = []
-    thrsholds = [10, 20, 40, 50, 60, 70, 80, 90, 100, 120, 130, 150, 170, 180, 200, 230]
+    thrsholds = [1, 3, 5, 7, 10, 13, 15, 18, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 130, 150, 170, 180, 200, 230]
     for thrs in thrsholds:
         res = [thrs]
         res.extend(get_percent_of_threshold(img, thrs))
@@ -49,6 +56,22 @@ def threshold_up_to_percent(src_img, target_percent):
     #     print('result = ', r[0], ' ', r[1])
     # print('\n')
     res_img = result[0][2]
-    src_img = src_img.copy()
-    src_img[res_img == 0] = (0, 0, 255)
-    return src_img
+    threshold_res = np.zeros((h, w, 1), np.uint8)
+    threshold_res[res_img == 0] = 255
+    src_img2 = src_img.copy()
+    src_img2[res_img == 0] = (0, 0, 255)
+    return threshold_res, src_img2
+
+def draw_box(img, c, size, color):
+    s = size[:]
+    s[0] = int(s[0] / 2.0)
+    s[1] = int(s[1] / 2.0)
+    p0 = (int(c[0] - s[0]), int(c[1] - s[1]))
+    p1 = (int(c[0] + s[0]), int(c[1] - s[1]))
+    p2 = (int(c[0] + s[0]), int(c[1] + s[1]))
+    p3 = (int(c[0] - s[0]), int(c[1] + s[1]))
+
+    cv2.line(img, p0, p1, color=color)
+    cv2.line(img, p1, p2, color=color)
+    cv2.line(img, p2, p3, color=color)
+    cv2.line(img, p3, p0, color=color)
