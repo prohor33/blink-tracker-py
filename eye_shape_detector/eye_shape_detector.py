@@ -7,7 +7,7 @@ class EyeShapeDetector:
 
     # на вход подается квадрат: глаз и то, что вокруг него в серых тонах
     def get_shape(self, src_img):
-        thrs_percent = 20
+        thrs_percent = 8
         threshold_res = utils.threshold_up_to_percent(src_img, thrs_percent)
 
         # edge_linking_thr = 0

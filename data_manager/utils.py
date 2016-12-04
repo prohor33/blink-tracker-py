@@ -35,17 +35,20 @@ def get_percent_of_threshold(img, thrs):
     retv, threshold_res = cv2.threshold(img, thresh=thrs, maxval=1,  type=cv2.THRESH_TOZERO)
     return [1.0 - cv2.countNonZero(threshold_res) / (h * w), threshold_res]
 
-def threshold_up_to_percent(img, target_percent):
+def threshold_up_to_percent(src_img, target_percent):
     target_percent = target_percent / 100.0
-    img = img[:, :, 0]
+    img = src_img[:, :, 0]
     result = []
-    thrsholds = [10, 40, 60, 80, 100, 120, 150, 180, 230]
+    thrsholds = [10, 20, 40, 50, 60, 70, 80, 90, 100, 120, 130, 150, 170, 180, 200, 230]
     for thrs in thrsholds:
         res = [thrs]
         res.extend(get_percent_of_threshold(img, thrs))
         result.append(res)
     result = sorted(result, key=lambda x: abs(x[1] - target_percent))
-    for r in result:
-        print('result = ', r[0], ' ', r[1])
-    print('\n')
-    return result[0][2]
+    # for r in result:
+    #     print('result = ', r[0], ' ', r[1])
+    # print('\n')
+    res_img = result[0][2]
+    src_img = src_img.copy()
+    src_img[res_img == 0] = (0, 0, 255)
+    return src_img
