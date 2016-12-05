@@ -10,7 +10,10 @@ class EyeShapeDetector:
         h, w, channels = src_img.shape
 
         thrs_percent = 8
-        threshold_res, threshold_vis = utils.threshold_up_to_percent(src_img, thrs_percent)
+        src_img_ths = src_img.copy()
+        utils.adjust_brightness(src_img_ths, 120)
+        src_img_ths[0 : int(h/4.0)][:] = (255, 255, 255)
+        threshold_res, threshold_vis = utils.threshold_up_to_percent(src_img_ths, thrs_percent)
 
         # находим контуры
         _, contours0, hierarchy = cv2.findContours(threshold_res.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -74,7 +77,10 @@ class EyeShapeDetector:
             cv2.drawContours(res_img4, [box], 0, (0, 0, 255), line_w)
 
         utils.draw_box(crosses_img, cross_p, cross_s, color=(0, 0, 255))
-        utils.draw_box(crosses_img, utils.get_box_center(box), cross_s, color=(0, 255, 0))
+
+        if len(ok_boxes) > 0:
+            res_box = ok_boxes[0]
+            utils.draw_box(crosses_img, utils.get_box_center(res_box), cross_s, color=(0, 255, 0))
 
         return src_img, threshold_vis, res_img2, res_img3, res_img4, crosses_img
 

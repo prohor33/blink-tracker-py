@@ -75,3 +75,15 @@ def draw_box(img, c, size, color):
     cv2.line(img, p1, p2, color=color)
     cv2.line(img, p2, p3, color=color)
     cv2.line(img, p3, p0, color=color)
+
+def adjust_brightness(img, brightness):
+    h, w, channels = img.shape
+    val = 0.0
+    for x in range(0, w):
+        for y in range(0, h):
+            val = val + img[x][y]
+    val = val / (h * w)
+
+    for x in range(0, w):
+        for y in range(0, h):
+            img[x][y] = np.clip(img[x][y] / val * brightness, 0, 255)
