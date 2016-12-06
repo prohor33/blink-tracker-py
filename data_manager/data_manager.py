@@ -194,9 +194,9 @@ class DataManager:
                 continue
             src_img = img.copy()
 
-            res0, res1, res2, res3, res4, res5 = eye_shape_det.get_shape(img)
+            results = eye_shape_det.get_shape(img)
 
-            res_img = np.concatenate((res0, res1, res2, res3, res4, res5), axis=1)
+            res_img = np.concatenate(results, axis=1)
             # res_img = res1
 
             # size_coef = 4

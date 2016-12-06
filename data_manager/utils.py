@@ -41,28 +41,30 @@ def get_percent_of_threshold(img, thrs):
     retv, threshold_res = cv2.threshold(img, thresh=thrs, maxval=1,  type=cv2.THRESH_TOZERO)
     return [1.0 - cv2.countNonZero(threshold_res) / (h * w), threshold_res]
 
+stat_threshold_res = {}
+
 def threshold_up_to_percent(src_img, target_percent):
     h, w, channels = src_img.shape
     target_percent = target_percent / 100.0
     img = src_img[:, :, 0]
     result = []
-    thrsholds = [1, 3, 5, 7, 10, 13, 15, 18, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 130, 150, 170, 180, 200, 230]
+    thrsholds = [5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200]
     for thrs in thrsholds:
         res = [thrs]
         res.extend(get_percent_of_threshold(img, thrs))
         result.append(res)
     result = sorted(result, key=lambda x: abs(x[1] - target_percent))
-    # for r in result:
-    #     print('result = ', r[0], ' ', r[1])
-    # print('\n')
     res_img = result[0][2]
+    thrs_val = result[0][0]
+    # stat_threshold_res[thrs_val] = stat_threshold_res.get(thrs_val, 0) + 1
+    # print(stat_threshold_res)
     threshold_res = np.zeros((h, w, 1), np.uint8)
     threshold_res[res_img == 0] = 255
     src_img2 = src_img.copy()
     src_img2[res_img == 0] = (0, 0, 255)
     return threshold_res, src_img2
 
-def draw_box(img, c, size, color):
+def draw_box(img, c, size, color, thickness=1):
     s = size[:]
     s[0] = int(s[0] / 2.0)
     s[1] = int(s[1] / 2.0)
@@ -71,10 +73,10 @@ def draw_box(img, c, size, color):
     p2 = (int(c[0] + s[0]), int(c[1] + s[1]))
     p3 = (int(c[0] - s[0]), int(c[1] + s[1]))
 
-    cv2.line(img, p0, p1, color=color)
-    cv2.line(img, p1, p2, color=color)
-    cv2.line(img, p2, p3, color=color)
-    cv2.line(img, p3, p0, color=color)
+    cv2.line(img, p0, p1, color=color, thickness=thickness)
+    cv2.line(img, p1, p2, color=color, thickness=thickness)
+    cv2.line(img, p2, p3, color=color, thickness=thickness)
+    cv2.line(img, p3, p0, color=color, thickness=thickness)
 
 def adjust_brightness(img, brightness):
     h, w, channels = img.shape

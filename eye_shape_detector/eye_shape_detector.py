@@ -63,6 +63,7 @@ class EyeShapeDetector:
         res_img2 = src_img.copy()
         res_img3 = src_img.copy()
         res_img4 = src_img.copy()
+        res_img5 = src_img.copy()
         h = h * scale_factor
         w = w * scale_factor
 
@@ -78,9 +79,13 @@ class EyeShapeDetector:
 
         utils.draw_box(crosses_img, cross_p, cross_s, color=(0, 0, 255))
 
+        res_box_center = cross_p
         if len(ok_boxes) > 0:
-            res_box = ok_boxes[0]
-            utils.draw_box(crosses_img, utils.get_box_center(res_box), cross_s, color=(0, 255, 0))
+            res_box_center = utils.get_box_center(ok_boxes[0])
+            utils.draw_box(crosses_img, res_box_center, cross_s, color=(0, 255, 0))
 
-        return src_img, threshold_vis, res_img2, res_img3, res_img4, crosses_img
+        middle_box_center = utils.get_middle(res_box_center, cross_p)
+        utils.draw_box(res_img5, middle_box_center, cross_s, color=(176, 29, 196), thickness=2)
+
+        return src_img, threshold_vis, res_img2, res_img3, res_img4, crosses_img, res_img5
 
