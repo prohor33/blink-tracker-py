@@ -15,7 +15,7 @@ def get_box_area(b):
     return distance(b[0], b[1]) * distance(b[1], b[2])
 
 def get_middle(p0, p1):
-    return ((p0[0] + p1[0]) / 2.0, (p0[1] + p1[1]) / 2.0)
+    return [(p0[0] + p1[0]) / 2.0, (p0[1] + p1[1]) / 2.0]
 
 def get_box_center(b):
     return get_middle(b[0], b[2])
@@ -89,3 +89,20 @@ def adjust_brightness(img, brightness):
     for x in range(0, w):
         for y in range(0, h):
             img[x][y] = np.clip(img[x][y] / val * brightness, 0, 255)
+
+def convert_rect_to_parent(img, rect_in_parent, rect):
+    height, width = img.shape
+    x = rect[0][0]
+    y = rect[0][1]
+    w = rect[1][0]
+    h = rect[1][1]
+    x_in_p = rect_in_parent[0][0]
+    y_in_p = rect_in_parent[0][1]
+    w_in_p = rect_in_parent[1][0]
+    h_in_p = rect_in_parent[1][1]
+    return [[int(x_in_p + x / width * w_in_p), int(y_in_p + y / height * h_in_p)],
+                                           [int(w / width * w_in_p), int(h / height * h_in_p)]]
+
+def box_to_rect(c, s):
+    s[:] = s[:] / 2.0
+    return [[c[0] - s[0], c[1] - s[1]], [c[0] + s[0], c[1] + s[1]]]

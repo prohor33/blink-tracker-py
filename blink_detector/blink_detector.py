@@ -1,6 +1,7 @@
 import cv2
 from face_detector import face_detector
 from eye_detector import eye_detector
+from eye_shape_detector import eye_shape_detector
 import timeit
 
 class BlinkDetector:
@@ -10,11 +11,13 @@ class BlinkDetector:
 
     face_det = None
     eye_det = None
+    eye_shape_det = None
 
     def __init__(self, is_video = True):
         self.is_video = is_video
         self.face_det = face_detector.FaceDetector(is_video)
         self.eye_det = eye_detector.EyeDetector(is_video)
+        self.eye_shape_det = eye_shape_detector.EyeShapeDetector()
 
 
     def detect(self, src_img):
@@ -45,5 +48,9 @@ class BlinkDetector:
         face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
 
         l_eye_img, r_eye_img, l_eye_rect, r_eye_rect = self.eye_det.get_eyes(src_img, face_img, face_rect)
+
+
+        norm_l_eye_img, norm_l_eye_rect = self.eye_shape_det.get_shape(src_img, l_eye_img, l_eye_rect)
+        norm_r_eye_img, norm_r_eye_rect = self.eye_shape_det.get_shape(src_img, r_eye_img, r_eye_rect)
 
         return True
