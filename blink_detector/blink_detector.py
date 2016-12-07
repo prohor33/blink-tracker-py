@@ -2,6 +2,7 @@ import cv2
 from face_detector import face_detector
 from eye_detector import eye_detector
 from eye_shape_detector import eye_shape_detector
+from data_manager import utils
 import timeit
 
 class BlinkDetector:
@@ -49,8 +50,12 @@ class BlinkDetector:
 
         l_eye_img, r_eye_img, l_eye_rect, r_eye_rect = self.eye_det.get_eyes(src_img, face_img, face_rect)
 
+        if l_eye_rect:
+            l_eye_rect = utils.tuple_to_rect(l_eye_rect)
+            norm_l_eye_img, norm_l_eye_rect = self.eye_shape_det.get_shape(src_img, l_eye_img, l_eye_rect)
 
-        norm_l_eye_img, norm_l_eye_rect = self.eye_shape_det.get_shape(src_img, l_eye_img, l_eye_rect)
-        norm_r_eye_img, norm_r_eye_rect = self.eye_shape_det.get_shape(src_img, r_eye_img, r_eye_rect)
+        if r_eye_rect:
+            r_eye_rect = utils.tuple_to_rect(r_eye_rect)
+            norm_r_eye_img, norm_r_eye_rect = self.eye_shape_det.get_shape(src_img, r_eye_img, r_eye_rect)
 
         return True

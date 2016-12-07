@@ -7,12 +7,12 @@ class EyeShapeDetector:
 
     # на вход подается квадрат: глаз и то, что вокруг него в серых тонах
     def get_shape(self, src_img, eye_img, eye_rect):
-        h, w, channels = eye_img.shape
+        h, w = eye_img.shape
 
         thrs_percent = 8
         src_img_ths = eye_img.copy()
         utils.adjust_brightness(src_img_ths, 120)
-        src_img_ths[0 : int(h/4.0)][:] = (255, 255, 255)
+        src_img_ths[0 : int(h/4.0)][:] = 255
         threshold_res, threshold_vis = utils.threshold_up_to_percent(src_img_ths, thrs_percent)
 
         # находим контуры
@@ -29,7 +29,7 @@ class EyeShapeDetector:
         res_canny = eye_img.copy()
         crosses_img = eye_img.copy()
 
-        res_canny[canny_img != 0] = (0, 255, 0)
+        res_canny[canny_img != 0] = 255
 
         # крестик где предполагаем центр глаза
         cross_p = [int(w / 2), int(0.65 * h)]
@@ -97,7 +97,11 @@ class EyeShapeDetector:
 
         res_rect = utils.box_to_rect(middle_box_center, res_cross_s)
         res_rect = utils.convert_rect_to_parent(eye_img, eye_rect, res_rect)
-        asd
+        res_img = utils.crop_img_by_rect(src_img, res_rect)
 
-        return eye_img, threshold_vis, res_img2, res_img3, res_img4, crosses_img, res_img5
+        utils.draw_rect(src_img, res_rect, color=(176, 29, 196), thickness=2)
+
+        return res_img, res_rect
+
+        # return eye_img, threshold_vis, res_img2, res_img3, res_img4, crosses_img, res_img5
 

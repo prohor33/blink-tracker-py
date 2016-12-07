@@ -138,7 +138,8 @@ class DataManager:
             height, width, chanel = frame.shape
 
             # уменьшаем размер
-            max_size = 200
+            max_size = 600
+            # max_size = 200
             transform_factor = max_size / max(width, height)
             if transform_factor < 1.0:
                 frame = cv2.resize(frame, (0, 0), fx=transform_factor, fy=transform_factor)

@@ -44,9 +44,9 @@ def get_percent_of_threshold(img, thrs):
 stat_threshold_res = {}
 
 def threshold_up_to_percent(src_img, target_percent):
-    h, w, channels = src_img.shape
+    h, w = src_img.shape
     target_percent = target_percent / 100.0
-    img = src_img[:, :, 0]
+    img = src_img[:, :]
     result = []
     thrsholds = [5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 150, 200]
     for thrs in thrsholds:
@@ -61,7 +61,7 @@ def threshold_up_to_percent(src_img, target_percent):
     threshold_res = np.zeros((h, w, 1), np.uint8)
     threshold_res[res_img == 0] = 255
     src_img2 = src_img.copy()
-    src_img2[res_img == 0] = (0, 0, 255)
+    src_img2[res_img == 0] = 255
     return threshold_res, src_img2
 
 def draw_box(img, c, size, color, thickness=1):
@@ -78,8 +78,12 @@ def draw_box(img, c, size, color, thickness=1):
     cv2.line(img, p2, p3, color=color, thickness=thickness)
     cv2.line(img, p3, p0, color=color, thickness=thickness)
 
+def draw_rect(img, rect, color, thickness=1):
+    c, s = rect_to_box(rect)
+    draw_box(img, c, s, color, thickness)
+
 def adjust_brightness(img, brightness):
-    h, w, channels = img.shape
+    h, w = img.shape
     val = 0.0
     for x in range(0, w):
         for y in range(0, h):
@@ -104,5 +108,20 @@ def convert_rect_to_parent(img, rect_in_parent, rect):
                                            [int(w / width * w_in_p), int(h / height * h_in_p)]]
 
 def box_to_rect(c, s):
-    s[:] = s[:] / 2.0
+    s[0] = s[0] / 2.0
+    s[1] = s[1] / 2.0
     return [[c[0] - s[0], c[1] - s[1]], [c[0] + s[0], c[1] + s[1]]]
+
+def get_rect_center(r):
+    return [r[0][0] + r[1][0] / 2.0, r[0][1] + r[1][1] / 2.0]
+
+def rect_to_box(r):
+    c = get_rect_center(r)
+    s = r[1]
+    return c, s
+
+def crop_img_by_rect(img, r):
+    return img[r[0][0] : r[0][0] + r[1][0], r[0][1] : r[0][1] + r[1][1]]
+
+def tuple_to_rect(t):
+    return [[t[0], t[1]], [t[2], t[3]]]
