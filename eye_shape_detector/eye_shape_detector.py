@@ -97,11 +97,10 @@ class EyeShapeDetector:
 
         res_rect = utils.box_to_rect(middle_box_center, res_cross_s)
         res_rect = utils.convert_rect_to_parent(eye_img, eye_rect, res_rect)
-        res_img = utils.crop_img_by_rect(src_img, res_rect)
 
-        utils.draw_rect(src_img, res_rect, color=(176, 29, 196), thickness=2)
+        utils.draw_rect(src_img, res_rect, color=(176, 29, 196), thickness=1)
 
-        return res_img, res_rect
+        return res_rect
 
         # return eye_img, threshold_vis, res_img2, res_img3, res_img4, crosses_img, res_img5
 

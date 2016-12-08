@@ -34,28 +34,40 @@ class BlinkDetector:
 
     # выделяет на входной картинке лицо и глаза, отмечает если моргнули
     def detect_impl(self, src_img):
+        src_h, src_w, _ = src_img.shape
 
-        face_rect, face_img = self.face_det.get_face(src_img)
-        if face_img is None:
+        src_img_gray = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
+
+        # лицо можно детектировать и на мелкой картинке
+        face_find_img = utils.resize_img_to(src_img_gray, 200)
+
+        face_rect = self.face_det.get_face(src_img, face_find_img, [[0, 0], [src_w, src_h]])
+        if face_rect is None:
             return False
 
-        face_h, face_w, face_chanel = face_img.shape
+        face_img = utils.crop_img_by_rect(src_img_gray, face_rect)
 
         # меняем размер лица к 100x100
-        new_size = 100
-        transform_factor = new_size / max(face_w, face_h)
-        face_img = cv2.resize(face_img, (0, 0), fx=transform_factor, fy=transform_factor)
+        face_img = utils.resize_img_to(face_img, 100)
 
-        face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
+        l_eye_rect, r_eye_rect = self.eye_det.get_eyes(src_img, face_img, face_rect)
 
-        l_eye_img, r_eye_img, l_eye_rect, r_eye_rect = self.eye_det.get_eyes(src_img, face_img, face_rect)
+        eye_img_size = 24
 
         if l_eye_rect:
-            l_eye_rect = utils.tuple_to_rect(l_eye_rect)
-            norm_l_eye_img, norm_l_eye_rect = self.eye_shape_det.get_shape(src_img, l_eye_img, l_eye_rect)
+            l_eye_img = utils.crop_img_by_rect(src_img_gray, l_eye_rect)
+            l_eye_img = utils.resize_img_to(l_eye_img, eye_img_size)
+            l_norm_eye_rect = self.eye_shape_det.get_shape(src_img, l_eye_img, l_eye_rect)
+
+            l_norm_eye_img = utils.crop_img_by_rect(src_img_gray, l_norm_eye_rect)
+            cv2.imshow('l_eye', l_norm_eye_img)
 
         if r_eye_rect:
-            r_eye_rect = utils.tuple_to_rect(r_eye_rect)
-            norm_r_eye_img, norm_r_eye_rect = self.eye_shape_det.get_shape(src_img, r_eye_img, r_eye_rect)
+            r_eye_img = utils.crop_img_by_rect(src_img_gray, r_eye_rect)
+            r_eye_img = utils.resize_img_to(r_eye_img, eye_img_size)
+            r_norm_eye_rect = self.eye_shape_det.get_shape(src_img, r_eye_img, r_eye_rect)
+
+            r_norm_eye_img = utils.crop_img_by_rect(src_img_gray, r_norm_eye_rect)
+            cv2.imshow('r_eye', r_norm_eye_img)
 
         return True

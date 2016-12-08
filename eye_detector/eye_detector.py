@@ -1,4 +1,5 @@
 import cv2
+from data_manager import utils
 
 class EyeDetector:
     # для видео используется ифнормация предыдущих кадров
@@ -33,7 +34,9 @@ class EyeDetector:
         self.face_height = height
 
         # ищем глаза только в верхней части лица
-        face_img = face_img[0:int(height * 0.8), 0:width]
+        height_coef = 0.8
+        face_img = face_img[0:int(height * height_coef), 0:width]
+        face_rect[1][1] = face_rect[1][1] * height_coef
 
         self.min_eye_size = (int(width / 10), int(width / 10))
         self.max_eye_size = (int(width / 3), int(width / 3))
@@ -70,32 +73,20 @@ class EyeDetector:
 
         # возвращаем результат
 
-        # лицо в изначальной картинке
-        face_x = face_rect[0][0]
-        face_y = face_rect[0][1]
-        face_w = face_rect[1][0]
-        face_h = face_rect[1][1]
-
-        to_src_coord = lambda x, y, w, h: (int(face_x + x / width * face_w), int(face_y + y / height * face_h),
-                                           int(w / width * face_w), int(h / height * face_h))
-
-        l_eye_img = None
-        r_eye_img = None
-
+        l_eye_rect = None
+        r_eye_rect = None
         if l_eye is not None:
-            x, y, w, h = l_eye
-            l_eye_img = face_img[y:y + h, x:x + w]
-            x, y, w, h = to_src_coord(*l_eye)
+            l_eye_rect = utils.tuple_to_rect(l_eye)
+            l_eye_rect = utils.convert_rect_to_parent(face_img, face_rect, l_eye_rect)
             # левый розовый
-            cv2.rectangle(src_img, (x, y), (x + w, y + h), (137, 66, 244), 1)  # BGR
+            utils.draw_rect(src_img, l_eye_rect, (137, 66, 244), 1) # BGR
 
         if r_eye is not None:
-            x, y, w, h = r_eye
-            r_eye_img = face_img[y:y + h, x:x + w]
-            x, y, w, h = to_src_coord(*r_eye)
-            cv2.rectangle(src_img, (x, y), (x + w, y + h), (0, 0, 255), 1)
+            r_eye_rect = utils.tuple_to_rect(r_eye)
+            r_eye_rect = utils.convert_rect_to_parent(face_img, face_rect, r_eye_rect)
+            utils.draw_rect(src_img, r_eye_rect, (0, 0, 255), 1)
 
-        return l_eye_img, r_eye_img, l_eye, r_eye
+        return l_eye_rect, r_eye_rect
 
 
     # запускает каскад и добавляет результаты

@@ -87,12 +87,12 @@ def adjust_brightness(img, brightness):
     val = 0.0
     for x in range(0, w):
         for y in range(0, h):
-            val = val + img[x][y]
+            val = val + img[y][x]
     val = val / (h * w)
 
     for x in range(0, w):
         for y in range(0, h):
-            img[x][y] = np.clip(img[x][y] / val * brightness, 0, 255)
+            img[y][x] = np.clip(img[y][x] / val * brightness, 0, 255)
 
 def convert_rect_to_parent(img, rect_in_parent, rect):
     height, width = img.shape
@@ -121,7 +121,19 @@ def rect_to_box(r):
     return c, s
 
 def crop_img_by_rect(img, r):
-    return img[r[0][0] : r[0][0] + r[1][0], r[0][1] : r[0][1] + r[1][1]]
+    return img[r[0][1] : r[0][1] + r[1][1], r[0][0] : r[0][0] + r[1][0]]
 
 def tuple_to_rect(t):
     return [[t[0], t[1]], [t[2], t[3]]]
+
+def get_img_size(img):
+    if len(img.shape) == 3:
+        h, w, _ = img.shape
+    else:
+        h, w = img.shape
+    return h, w
+
+def resize_img_to(img, max_size):
+    h, w = get_img_size(img)
+    transform_factor = max_size / max(w, h)
+    return cv2.resize(img, (0, 0), fx=transform_factor, fy=transform_factor)
