@@ -54,20 +54,37 @@ class BlinkDetector:
 
         eye_img_size = 24
 
+        l_norm_eye_rect = None
+        r_norm_eye_rect = None
+        l_norm_eye_img = None
+        r_norm_eye_img = None
+
         if l_eye_rect:
             l_eye_img = utils.crop_img_by_rect(src_img_gray, l_eye_rect)
             l_eye_img = utils.resize_img_to(l_eye_img, eye_img_size)
             l_norm_eye_rect = self.eye_shape_det.get_shape(src_img, l_eye_img, l_eye_rect)
-
             l_norm_eye_img = utils.crop_img_by_rect(src_img_gray, l_norm_eye_rect)
-            cv2.imshow('l_eye', l_norm_eye_img)
 
         if r_eye_rect:
             r_eye_img = utils.crop_img_by_rect(src_img_gray, r_eye_rect)
             r_eye_img = utils.resize_img_to(r_eye_img, eye_img_size)
             r_norm_eye_rect = self.eye_shape_det.get_shape(src_img, r_eye_img, r_eye_rect)
-
             r_norm_eye_img = utils.crop_img_by_rect(src_img_gray, r_norm_eye_rect)
+
+        if l_norm_eye_rect and r_norm_eye_rect:
+            # делаем поворот
+            l_c = utils.get_rect_center(l_norm_eye_rect)
+            r_c = utils.get_rect_center(r_norm_eye_rect)
+            angle = utils.get_v_angle([r_c, l_c])
+            l_norm_eye_img = utils.rotate_img(l_norm_eye_img, angle)
+            r_norm_eye_img = utils.rotate_img(r_norm_eye_img, angle)
+
+        if l_norm_eye_rect:
+            cv2.imshow('l_eye', l_norm_eye_img)
+            print(utils.get_img_size(l_norm_eye_img))
+        if r_norm_eye_rect:
             cv2.imshow('r_eye', r_norm_eye_img)
 
+
         return True
+

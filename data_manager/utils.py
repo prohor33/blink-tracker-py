@@ -83,7 +83,8 @@ def draw_rect(img, rect, color, thickness=1):
     draw_box(img, c, s, color, thickness)
 
 # box center + size
-# rect top left, size
+# rect [top left, size]
+# vector [start_p, end_p]
 def adjust_brightness(img, brightness):
     h, w = img.shape
     val = 0.0
@@ -137,3 +138,18 @@ def resize_img_to(img, max_size):
     h, w = get_img_size(img)
     transform_factor = max_size / max(w, h)
     return cv2.resize(img, (0, 0), fx=transform_factor, fy=transform_factor)
+
+# нулевой угол у вектора (1, 0), положительно против часовой
+def get_v_angle(v):
+    d = distance(v[0], v[1])
+    sin_v = v[1][1] - v[0][1]
+    cos_v = v[1][0] - v[0][0]
+    angle = math.asin(sin_v / d)
+    if cos_v < 0:
+        angle = math.pi - angle
+    return angle
+
+def rotate_img(img, angle):
+    h, w = get_img_size(img)
+    M = cv2.getRotationMatrix2D((h / 2, w / 2), angle * 180.0 / math.pi, 1)
+    return cv2.warpAffine(img, M, (h, w))
