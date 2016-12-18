@@ -82,6 +82,8 @@ def draw_rect(img, rect, color, thickness=1):
     c, s = rect_to_box(rect)
     draw_box(img, c, s, color, thickness)
 
+# box center + size
+# rect top left, size
 def adjust_brightness(img, brightness):
     h, w = img.shape
     val = 0.0
@@ -108,9 +110,7 @@ def convert_rect_to_parent(img, rect_in_parent, rect):
                                            [int(w / width * w_in_p), int(h / height * h_in_p)]]
 
 def box_to_rect(c, s):
-    s[0] = s[0] / 2.0
-    s[1] = s[1] / 2.0
-    return [[c[0] - s[0], c[1] - s[1]], [c[0] + s[0], c[1] + s[1]]]
+    return [[c[0] - s[0] / 2.0, c[1] - s[1] / 2.0], [s[0], s[1]]]
 
 def get_rect_center(r):
     return [r[0][0] + r[1][0] / 2.0, r[0][1] + r[1][1] / 2.0]
