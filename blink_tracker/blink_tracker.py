@@ -81,7 +81,6 @@ class BlinkDetector:
 
         if l_norm_eye_rect:
             cv2.imshow('l_eye', l_norm_eye_img)
-            print(utils.get_img_size(l_norm_eye_img))
         if r_norm_eye_rect:
             cv2.imshow('r_eye', r_norm_eye_img)
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 from face_detector import face_detector
 from eye_detector import eye_detector
-from blink_detector import blink_detector
+from blink_tracker import blink_tracker
 from eye_shape_detector import eye_shape_detector
+from eye_state_detector import eye_state_detector
 import os
 import cv2
 import shutil
@@ -127,7 +128,7 @@ class DataManager:
     def run_on_video(self, filename):
         cap = cv2.VideoCapture(filename)
 
-        blink_det = blink_detector.BlinkDetector()
+        blink_det = blink_tracker.BlinkDetector()
 
         while (True):
             cap.grab()
@@ -204,3 +205,8 @@ class DataManager:
             # size_coef = 3
             # res_img = cv2.resize(res_img, None, fx=size_coef, fy=size_coef, interpolation=cv2.INTER_CUBIC)
             cv2.imwrite(res_dir + filename, res_img)
+
+    def run_eye_state_detection(self, src_dir):
+
+        eye_state_det = eye_state_detector.EyeStateDetector()
+        eye_state_det.load_train_data(src_dir)
