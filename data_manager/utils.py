@@ -153,3 +153,16 @@ def rotate_img(img, angle):
     h, w = get_img_size(img)
     M = cv2.getRotationMatrix2D((h / 2, w / 2), angle * 180.0 / math.pi, 1)
     return cv2.warpAffine(img, M, (h, w))
+
+def normalize_data(data, max_value):
+    c = max_value / np.max(data)
+    for i in range(len(data)):
+        data[i] *= c
+
+def normalize_2d_data(data, max_value):
+    h, w = data.shape
+    c = max_value / np.max(data)
+
+    for x in range(0, w):
+        for y in range(0, h):
+            data[y][x] = data[y][x] * c
