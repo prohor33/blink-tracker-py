@@ -2,6 +2,7 @@ import cv2
 from face_detector import face_detector
 from eye_detector import eye_detector
 from eye_shape_detector import eye_shape_detector
+from eye_state_detector import eye_state_detector
 from data_manager import utils
 import timeit
 
@@ -13,12 +14,14 @@ class BlinkDetector:
     face_det = None
     eye_det = None
     eye_shape_det = None
+    eye_state_det = None
 
     def __init__(self, is_video = True):
         self.is_video = is_video
         self.face_det = face_detector.FaceDetector(is_video)
         self.eye_det = eye_detector.EyeDetector(is_video)
         self.eye_shape_det = eye_shape_detector.EyeShapeDetector()
+        self.eye_state_det = eye_state_detector.EyeStateDetector()
 
 
     def detect(self, src_img):
@@ -81,8 +84,10 @@ class BlinkDetector:
 
         if l_norm_eye_rect:
             cv2.imshow('l_eye', l_norm_eye_img)
+            self.eye_state_det.get_eye_state(src_img, l_norm_eye_img, l_norm_eye_rect)
         if r_norm_eye_rect:
             cv2.imshow('r_eye', r_norm_eye_img)
+            self.eye_state_det.get_eye_state(src_img, r_norm_eye_img, r_norm_eye_rect)
 
 
         return True

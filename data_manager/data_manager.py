@@ -208,5 +208,5 @@ class DataManager:
 
     def run_eye_state_detection(self, src_dir):
 
-        eye_state_det = eye_state_detector.EyeStateDetector()
-        eye_state_det.load_train_data(src_dir)
+        eye_state_det = eye_state_detector.EyeStateDetector(load_model=False)
+        eye_state_det.train_model(src_dir)

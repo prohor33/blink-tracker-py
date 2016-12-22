@@ -166,3 +166,8 @@ def normalize_2d_data(data, max_value):
     for x in range(0, w):
         for y in range(0, h):
             data[y][x] = data[y][x] * c
+
+def cut_to_square(img):
+    h, w = get_img_size(img)
+    size = min(h, w)
+    return img[0 : h][0 : w]

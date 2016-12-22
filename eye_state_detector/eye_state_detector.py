@@ -6,14 +6,23 @@ from sklearn.svm import SVC
 from sklearn.datasets.base import Bunch
 from sklearn.cross_validation import train_test_split
 from sklearn.cross_validation import cross_val_score, KFold
+from sklearn.externals import joblib
 from scipy.stats import sem
 from sklearn import metrics
+import random
 
 class EyeStateDetector:
 
     img_def_size = 24
+    svc_1 = None
+    model_filename = 'data/eye_state_detector.pkl'
 
-    def load_train_data(self, src_dir):
+    def __init__(self, load_model=True):
+        if load_model:
+            self.svc_1 = joblib.load(self.model_filename)
+
+
+    def train_model(self, src_dir):
 
         data_size = self.img_def_size * self.img_def_size
         eyes = Bunch(images=np.ndarray(shape=(0, self.img_def_size, self.img_def_size) , dtype=float),
@@ -29,17 +38,34 @@ class EyeStateDetector:
         # print(np.min(eyes.data))
         # print(np.mean(eyes.data))
 
-        # print(eyes)
+        print(eyes)
 
-        svc_1 = SVC(kernel='linear')
-        print(svc_1)
+        self.svc_1 = SVC(kernel='linear')
+        print(self.svc_1)
 
         X_train, X_test, y_train, y_test = train_test_split(eyes.data, eyes.target, test_size=0.25, random_state=0)
 
-        self.evaluate_cross_validation(svc_1, X_train, y_train, 5)
+        self.evaluate_cross_validation(self.svc_1, X_train, y_train, 5)
 
-        self.train_and_evaluate(svc_1, X_train, X_test, y_train, y_test)
+        self.train_and_evaluate(self.svc_1, X_train, X_test, y_train, y_test)
 
+        _ = joblib.dump(self.svc_1, self.model_filename, compress=9)
+
+        # i = 0
+        # ind = 0
+        # print("this person is smiling: {0}".format(self.svc_1.predict(eyes.data[ind, :]) == 1))
+        # cv2.imshow('frame', eyes.images[ind])
+        #
+        # while (True):
+        #     if cv2.waitKey(1) & 0xFF == ord('q'):
+        #         break
+        #
+        #     i += 1
+        #     if i > 100:
+        #         print("this eye is open: {0}".format(self.svc_1.predict(eyes.data[ind, :]) == 1))
+        #         cv2.imshow('frame', eyes.images[ind])
+        #         i = 0
+        #         ind = random.randint(0, 2 * img_number)
 
     def load_eyes_from_dir(self, src_dir, open, number, eyes):
 
@@ -96,7 +122,33 @@ class EyeStateDetector:
         print("Confusion Matrix:")
         print(metrics.confusion_matrix(y_test, y_pred))
 
+
+
     # eye_img - 24x24 картинка глаза в серых тонах
-    # возвращает вероятность того, что глаз закрыт от 0 до 100
-    # def get_eye_state(self, src_img, eye_img, eye_rect):
+    # возвращает True если глаз открыт
+    def get_eye_state(self, src_img, eye_img, eye_rect):
+
+        h, w = utils.get_img_size(eye_img)
+        if abs(h - w) > 1:
+            print('error: img not a square: (', h, ',', w, ')')
+            return False
+
+        img = eye_img
+        if h != w:
+            img = utils.cut_to_square(img)
+
+        if h != self.img_def_size:
+            img = utils.resize_img_to(img, self.img_def_size)
+
+        img_data = img
+        img_data = np.array(img_data, dtype=float)
+        utils.normalize_2d_data(img_data, 1.0)
+        img_data = img_data.flatten()
+
+        img_data = img_data.reshape(1, -1)    # ?? single sample
+        eye_opened = self.svc_1.predict(img_data) == 1
+
+        utils.draw_rect(src_img, eye_rect, (0, 255, 0) if eye_opened else (0, 0, 255), 3)
+
+        return eye_opened
 
