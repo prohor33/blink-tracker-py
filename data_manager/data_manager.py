@@ -125,8 +125,15 @@ class DataManager:
         print('complement eye variants: ' + str(eye_det.complement_eye_variants_stat))
         print('all eyes pair are contradict: ' + str(eye_det.all_eyes_pair_are_contradict))
 
+    def run_on_webcam(self):
+        self.run_on_video("")
+
     def run_on_video(self, filename):
-        cap = cv2.VideoCapture(filename)
+
+        if len(filename) == 0:
+            cap = cv2.VideoCapture(0)
+        else:
+            cap = cv2.VideoCapture(filename)
 
         blink_det = blink_tracker.BlinkDetector()
 
@@ -161,6 +168,32 @@ class DataManager:
         # When everything done, release the capture
         cap.release()
         cv2.destroyAllWindows()
+
+    def run_on_images(self, src_dir):
+        blink_det = blink_tracker.BlinkDetector(is_video=False)
+
+        res_dir = src_dir + '_res/'
+        l_res_dir = src_dir + '_res/left_eye/'
+        r_res_dir = src_dir + '_res/right_eye/'
+        if os.path.exists(res_dir):
+            shutil.rmtree(res_dir)
+        os.makedirs(l_res_dir)
+        os.makedirs(r_res_dir)
+
+        for filename in os.listdir(src_dir):
+            img = cv2.imread(src_dir + '/' + filename)
+            if img is None:
+                print('warning: no image')
+                continue
+
+            l_res, r_res = blink_det.detect(img)
+            if l_res is not None:
+                cv2.imwrite(l_res_dir + filename, l_res)
+            if r_res is not None:
+                cv2.imwrite(r_res_dir + filename, r_res)
+
+
+
 
 
     eye_cascade = cv2.CascadeClassifier('data/haars/haarcascade_eye.xml')
@@ -206,7 +239,11 @@ class DataManager:
             # res_img = cv2.resize(res_img, None, fx=size_coef, fy=size_coef, interpolation=cv2.INTER_CUBIC)
             cv2.imwrite(res_dir + filename, res_img)
 
-    def run_eye_state_detection(self, src_dir):
+    def train_model(self, src_dir):
 
         eye_state_det = eye_state_detector.EyeStateDetector(load_model=False)
         eye_state_det.train_model(src_dir)
+
+    def test_model(self, src_dir):
+        eye_state_det = eye_state_detector.EyeStateDetector()
+        eye_state_det.test_model(src_dir)

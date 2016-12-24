@@ -87,11 +87,13 @@ class EyeShapeDetector:
         #     res_box_center = utils.get_box_center(ok_boxes[0])
         #     utils.draw_box(crosses_img, res_box_center, cross_s, color=(0, 255, 0))
 
-        middle_box_center = utils.get_middle(res_box_center, cross_p)
+        # оставили пока просто статическое положение
+        # middle_box_center = utils.get_middle(res_box_center, cross_p)
+        middle_box_center = cross_p
 
         # сдвинем результат внутрь области глаза
-        middle_box_center[0] = np.clip(middle_box_center[0], res_cross_s[0] / 2.0, w - res_cross_s[0] / 2.0)
-        middle_box_center[1] = np.clip(middle_box_center[1], res_cross_s[1] / 2.0, h - res_cross_s[1] / 2.0)
+        # middle_box_center[0] = np.clip(middle_box_center[0], res_cross_s[0] / 2.0, w - res_cross_s[0] / 2.0)
+        # middle_box_center[1] = np.clip(middle_box_center[1], res_cross_s[1] / 2.0, h - res_cross_s[1] / 2.0)
 
         # utils.draw_box(res_img5, middle_box_center, res_cross_s, color=(176, 29, 196), thickness=2)
 

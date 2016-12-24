@@ -27,10 +27,10 @@ class EyeStateDetector:
         data_size = self.img_def_size * self.img_def_size
         eyes = Bunch(images=np.ndarray(shape=(0, self.img_def_size, self.img_def_size) , dtype=float),
                                        data=np.ndarray(shape=(0,data_size), dtype=float), target=np.ndarray(shape=(0), dtype=int))
-        open_eyes_dir = src_dir + '/openEyesTraining'
-        close_eyes_dir = src_dir + '/closedEyesTraining'
+        open_eyes_dir = src_dir + '/open'
+        close_eyes_dir = src_dir + '/closed'
 
-        img_number = 300
+        img_number = 3000
         self.load_eyes_from_dir(open_eyes_dir, number=img_number, open=True, eyes=eyes)
         self.load_eyes_from_dir(close_eyes_dir, number=img_number, open=False, eyes=eyes)
 
@@ -122,6 +122,16 @@ class EyeStateDetector:
         print("Confusion Matrix:")
         print(metrics.confusion_matrix(y_test, y_pred))
 
+    def evaluate(self, clf, X_test, y_test):
+        print("Accuracy on testing set:")
+        print(clf.score(X_test, y_test))
+
+        y_pred = clf.predict(X_test)
+
+        print("Classification Report:")
+        print(metrics.classification_report(y_test, y_pred))
+        print("Confusion Matrix:")
+        print(metrics.confusion_matrix(y_test, y_pred))
 
 
     # eye_img - 24x24 картинка глаза в серых тонах
@@ -136,6 +146,7 @@ class EyeStateDetector:
         img = eye_img
         if h != w:
             img = utils.cut_to_square(img)
+        h, w = utils.get_img_size(img)
 
         if h != self.img_def_size:
             img = utils.resize_img_to(img, self.img_def_size)
@@ -150,5 +161,19 @@ class EyeStateDetector:
 
         utils.draw_rect(src_img, eye_rect, (0, 255, 0) if eye_opened else (0, 0, 255), 3)
 
-        return eye_opened
+        return eye_opened, img
+
+    def test_model(self, src_dir):
+
+        data_size = self.img_def_size * self.img_def_size
+        eyes = Bunch(images=np.ndarray(shape=(0, self.img_def_size, self.img_def_size) , dtype=float),
+                                       data=np.ndarray(shape=(0,data_size), dtype=float), target=np.ndarray(shape=(0), dtype=int))
+        open_eyes_dir = src_dir + '/open'
+        close_eyes_dir = src_dir + '/closed'
+
+        img_number = 3000
+        self.load_eyes_from_dir(open_eyes_dir, number=img_number, open=True, eyes=eyes)
+        self.load_eyes_from_dir(close_eyes_dir, number=img_number, open=False, eyes=eyes)
+
+        self.evaluate(self.svc_1, eyes.data, eyes.target)
 

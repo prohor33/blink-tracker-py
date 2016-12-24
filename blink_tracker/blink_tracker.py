@@ -27,13 +27,16 @@ class BlinkDetector:
     def detect(self, src_img):
         start_time = timeit.default_timer()
 
-        self.detect_impl(src_img)
+        l_res, r_res = self.detect_impl(src_img)
 
         height, width, chanel = src_img.shape
 
         elapsed = timeit.default_timer() - start_time
-        cv2.putText(src_img, 'FPS: ' + str(int(1.0 / elapsed)), (width - 150, 50),
+        if self.is_video:
+            cv2.putText(src_img, 'FPS: ' + str(int(1.0 / elapsed)), (width - 150, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
+
+        return l_res, r_res
 
     # выделяет на входной картинке лицо и глаза, отмечает если моргнули
     def detect_impl(self, src_img):
@@ -46,7 +49,7 @@ class BlinkDetector:
 
         face_rect = self.face_det.get_face(src_img, face_find_img, [[0, 0], [src_w, src_h]])
         if face_rect is None:
-            return False
+            return None, None
 
         face_img = utils.crop_img_by_rect(src_img_gray, face_rect)
 
@@ -82,13 +85,18 @@ class BlinkDetector:
             l_norm_eye_img = utils.rotate_img(l_norm_eye_img, angle)
             r_norm_eye_img = utils.rotate_img(r_norm_eye_img, angle)
 
+
+        l_res_img = None
+        r_res_img = None
         if l_norm_eye_rect:
-            cv2.imshow('l_eye', l_norm_eye_img)
-            self.eye_state_det.get_eye_state(src_img, l_norm_eye_img, l_norm_eye_rect)
+            if self.is_video:
+                cv2.imshow('l_eye', l_norm_eye_img)
+            l_is_opened, l_res_img = self.eye_state_det.get_eye_state(src_img, l_norm_eye_img, l_norm_eye_rect)
         if r_norm_eye_rect:
-            cv2.imshow('r_eye', r_norm_eye_img)
-            self.eye_state_det.get_eye_state(src_img, r_norm_eye_img, r_norm_eye_rect)
+            if self.is_video:
+                cv2.imshow('r_eye', r_norm_eye_img)
+            r_is_opened, r_res_img = self.eye_state_det.get_eye_state(src_img, r_norm_eye_img, r_norm_eye_rect)
 
 
-        return True
+        return l_res_img, r_res_img
 
